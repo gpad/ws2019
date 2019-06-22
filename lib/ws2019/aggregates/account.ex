@@ -1,6 +1,8 @@
 defmodule Ws2019.Aggregates.Account do
   use GenServer
 
+  # TODO: Create Supervisro for account
+
   def start_link(id, value) do
     GenServer.start_link(__MODULE__, [id, value], name: :"#{id}")
   end
@@ -9,34 +11,50 @@ defmodule Ws2019.Aggregates.Account do
     {:ok, %{id: id, last_action: DateTime.utc_now(), value: value}}
   end
 
-  def get_value(id), do: GenServer.call(id, :get_call)
+  def current_value(id), do: GenServer.call(id, :current_value)
 
   def consume(id, amount), do: GenServer.call(id, {:consume, amount})
   def recharge(id, amount), do: GenServer.cast(id, {:recharge, amount})
 
-  def handle_call(:get_value, _, %{value: value} = state) do
+  def handle_call(:current_value, _from, %{value: value} = state) do
     {:reply, {:ok, value}, %{state | last_action: DateTime.utc_now()}}
   end
 
-  def handle_cast({:consume, amount}, _from, %{value: value, id: id} = state) do
+  def handle_call({:consume, amount}, _from, %{value: value, id: id} = state) do
     if value > amount do
       new_value = value - amount
-      :ok = emit(:payment_executed, id, %{consumed: amount, current_value: new_value})
-      {:noreply, {:ok, new_value}, %{state | value: new_value, last_action: DateTime.utc_now()}}
+      :ok = emit(:payment_accepted, id, %{consumed: amount, current_value: new_value})
+      {:reply, {:ok, new_value}, %{state | value: new_value, last_action: DateTime.utc_now()}}
     else
       :ok = emit(:payment_refused, id, %{reason: :not_enough_money, current_value: value})
-      {:noreply, {:error, :not_enough_money}, %{state | last_action: DateTime.utc_now()}}
+      {:reply, {:error, :not_enough_money}, %{state | last_action: DateTime.utc_now()}}
     end
   end
 
-  def handle_call({:recharge, amount}, %{value: value, id: id} = state) do
+  def handle_cast({:recharge, amount}, %{value: value, id: id} = state) do
     new_value = value + amount
-    emit(:recharged, id, %{reason: :not_enough_money, current_value: value})
+    emit(:recharged, id, %{amount: amount, prev_value: value, current_value: new_value})
     {:noreply, %{state | value: new_value, last_action: DateTime.utc_now()}}
   end
 
-  defp emit(_event, _id, _payload) do
-    # TODO: FIX EVENTS!!!
+  defp emit(event_id, aggregate_id, payload) do
+    event = make_event(event_id, aggregate_id, payload)
+
+    Registry.dispatch(:event_dispatcher, "money", fn entries ->
+      for {pid, _} <- entries do
+        send(pid, {:broad_cast_event, event})
+      end
+    end)
+
     :ok
+  end
+
+  defp make_event(event_id, aggregate_id, payload) do
+    %{
+      event_id: event_id,
+      aggregate_id: aggregate_id,
+      header: %{emited_at: DateTime.utc_now()},
+      payload: payload
+    }
   end
 end

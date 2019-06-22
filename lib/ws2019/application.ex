@@ -9,8 +9,16 @@ defmodule Ws2019.Application do
     # List all child processes to be supervised
     children = [
       # Starts a worker by calling: Ws2019.Worker.start_link(arg)
-      # {Ws2019.Worker, arg},
+      {Ws2019.Projections.Payments, []},
+      {Ws2019.Projections.Recharges, []}
     ]
+
+    {:ok, _} =
+      Registry.start_link(
+        keys: :duplicate,
+        name: :event_dispatcher,
+        partitions: System.schedulers_online()
+      )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

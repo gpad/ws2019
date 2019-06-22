@@ -1,33 +1,49 @@
 defmodule Ws2019.Projections.Recharges do
   use GenServer
 
-  def start_link(id, value) do
-    GenServer.start_link(__MODULE__, [id, value], name: :"#{id}")
+  # TODO: Remove empty list
+  def start_link([]) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def init([id, value]) do
-    {:ok, %{id: id, last_action: DateTime.utc_now(), value: value}}
+  def init([]) do
+    :ok = register("money")
+    {:ok, %{recharges: []}}
   end
 
-  # TODO: FUNZIONE Wrapper
-  # TODO: comandi sync or async ?!?!
-  # TODO: Emissione di event ???
+  def recharges(), do: GenServer.call(__MODULE__, :recharges)
 
-  def handle_call(:get_value, _, %{value: value} = state) do
-    {:reply, {:ok, value}, %{state | last_action: DateTime.utc_now()}}
+  def handle_call(:recharges, _from, state) do
+    {:reply, {:ok, state.recharges}, state}
   end
 
-  def handle_call({:consume, amount}, _, %{value: value} = state) do
-    if value > amount do
-      new_value = value - amount
-      {:reply, {:ok, new_value}, %{state | value: new_value, last_action: DateTime.utc_now()}}
-    else
-      {:reply, {:error, :not_enough_money}, %{state | last_action: DateTime.utc_now()}}
-    end
+  defp handle_event(%{event_id: :recharged} = event, state) do
+    recharges = make_recharge_from(event) |> sorted_merge(state.recharges)
+    {:ok, %{state | recharges: recharges}}
   end
 
-  def handle_call({:recharge, amount}, _, %{value: value} = state) do
-    new_value = value + amount
-    {:reply, {:ok, new_value}, %{state | value: new_value, last_action: DateTime.utc_now()}}
+  defp handle_event(_event, state), do: {:ok, state}
+
+  defp register(topic) do
+    {:ok, _} = Registry.register(:event_dispatcher, topic, [])
+    :ok
+  end
+
+  def handle_info({:broad_cast_event, event}, state) do
+    {:ok, new_state} = handle_event(event, state)
+    {:noreply, new_state}
+  end
+
+  # TODO: create a struct for recharges
+  defp make_recharge_from(%{event_id: :recharged} = event) do
+    %{
+      current_value: event.payload.current_value,
+      recharged_of: event.payload.amount,
+      recharged_at: event.header.emited_at
+    }
+  end
+
+  defp sorted_merge(recharge, recharges) do
+    Enum.sort([recharge | recharges], fn r1, r2 -> r1.recharged_at < r2.recharged_at end)
   end
 end
