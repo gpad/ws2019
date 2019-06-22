@@ -1,4 +1,4 @@
-defmodule Ws2019.Projectsions.Payments do
+defmodule Ws2019.Projections.Payments do
   use GenServer
 
   def start_link(id, value) do

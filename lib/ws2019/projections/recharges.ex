@@ -1,4 +1,4 @@
-defmodule Ws2019.Projectsions.Recharges do
+defmodule Ws2019.Projections.Recharges do
   use GenServer
 
   def start_link(id, value) do
