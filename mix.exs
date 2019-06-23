@@ -30,6 +30,7 @@ defmodule Ws2019.MixProject do
   defp deps do
     [
       {:uuid, "~> 1.1"},
+      {:gen_state_machine, "~> 2.0"},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},

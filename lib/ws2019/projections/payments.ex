@@ -48,7 +48,7 @@ defmodule Ws2019.Projections.Payments do
       result: :acceptd,
       amount: event.payload.consumed,
       current_value: event.payload.current_value,
-      executed_at: event.header.emited_at
+      executed_at: event.header.emitted_at
     }
   end
 
@@ -57,7 +57,7 @@ defmodule Ws2019.Projections.Payments do
       result: :refused,
       reason: event.payload.reason,
       current_value: event.payload.current_value,
-      executed_at: event.header.emited_at
+      executed_at: event.header.emitted_at
     }
   end
 

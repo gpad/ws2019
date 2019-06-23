@@ -39,7 +39,7 @@ defmodule Ws2019.Projections.Recharges do
     %{
       current_value: event.payload.current_value,
       recharged_of: event.payload.amount,
-      recharged_at: event.header.emited_at
+      recharged_at: event.header.emitted_at
     }
   end
 
