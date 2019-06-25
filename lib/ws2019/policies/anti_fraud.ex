@@ -5,7 +5,6 @@ defmodule Ws2019.Policies.AntiFraud do
   Too many payments failed block the account!!!
   """
 
-  # TODO: Create one for every account
   def start_link(aggregate_id) do
     GenStateMachine.start_link(__MODULE__, [aggregate_id], name: :"anti_fraud_#{aggregate_id}")
   end
@@ -64,7 +63,7 @@ defmodule Ws2019.Policies.AntiFraud do
 
   def warning(:state_timeout, event, %{aggregate_id: aggregate_id} = data) do
     IO.puts("Block account #{aggregate_id} - because:\n\t#{inspect(event)}")
-    Ws2019.Aggregates.Account.block(:"#{aggregate_id}", "Timeout Payment Refused")
+    Ws2019.Aggregates.Account.block(aggregate_id, "Timeout Payment Refused")
     {:next_state, :blocked, data}
   end
 

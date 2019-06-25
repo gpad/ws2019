@@ -12,11 +12,21 @@ defmodule Ws2019.Aggregates.Account do
     {:ok, %{id: id, last_action: DateTime.utc_now(), value: value, anti_fraud_pid: pid}}
   end
 
-  def current_value(id), do: GenServer.call(id, :current_value)
+  def current_value(id) when is_atom(id) or is_pid(id), do: GenServer.call(id, :current_value)
+  def current_value(id), do: GenServer.call(:"#{id}", :current_value)
 
-  def consume(id, amount), do: GenServer.call(id, {:consume, amount})
-  def recharge(id, amount), do: GenServer.cast(id, {:recharge, amount})
-  def block(id, reason), do: GenServer.cast(id, {:block, reason})
+  def consume(id, amount) when is_atom(id) or is_pid(id),
+    do: GenServer.call(id, {:consume, amount})
+
+  def consume(id, amount), do: GenServer.call(:"#{id}", {:consume, amount})
+
+  def recharge(id, amount) when is_atom(id) or is_pid(id),
+    do: GenServer.cast(id, {:recharge, amount})
+
+  def recharge(id, amount), do: GenServer.cast(:"#{id}", {:recharge, amount})
+
+  def block(id, reason) when is_atom(id) or is_pid(id), do: GenServer.cast(id, {:block, reason})
+  def block(id, reason), do: GenServer.cast(:"#{id}", {:block, reason})
 
   def handle_call(:current_value, _from, %{value: value} = state) do
     {:reply, {:ok, value}, %{state | last_action: DateTime.utc_now()}}

@@ -8,16 +8,22 @@ defmodule Ws2019.Projections.Recharges do
 
   def init([]) do
     :ok = register("money")
-    {:ok, %{recharges: []}}
+    {:ok, %{recharges: [], log_event: false}}
   end
 
   def recharges(), do: GenServer.call(__MODULE__, :recharges)
+  def log_event(value), do: GenServer.cast(__MODULE__, {:log_event, value})
 
   def handle_call(:recharges, _from, state) do
     {:reply, {:ok, state.recharges}, state}
   end
 
+  def handle_cast({:log_event, value}, state) do
+    {:noreply, %{state | log_event: value}}
+  end
+
   defp handle_event(%{event_id: :recharged} = event, state) do
+    log(event, state)
     recharges = make_recharge_from(event) |> sorted_merge(state.recharges)
     {:ok, %{state | recharges: recharges}}
   end
@@ -34,7 +40,6 @@ defmodule Ws2019.Projections.Recharges do
     {:noreply, new_state}
   end
 
-  # TODO: create a struct for recharges
   defp make_recharge_from(%{event_id: :recharged} = event) do
     %{
       current_value: event.payload.current_value,
@@ -46,4 +51,14 @@ defmodule Ws2019.Projections.Recharges do
   defp sorted_merge(recharge, recharges) do
     Enum.sort([recharge | recharges], fn r1, r2 -> r1.recharged_at < r2.recharged_at end)
   end
+
+  defp log(%{aggregate_id: aggregate_id} = event, %{log_event: true}) do
+    IO.puts(
+      "[LOGEVENT] Recharge executed of #{event.payload.amount} for aggregate_id: #{aggregate_id} curent value: #{
+        event.payload.amount
+      }"
+    )
+  end
+
+  defp log(_, _), do: :ok
 end
