@@ -1,21 +1,19 @@
 # Ws2019
 
-**TODO: Add description**
+Example application for https://www.agilemovement.it/workingsoftware/ 2019.
+
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ws2019` to your list of dependencies in `mix.exs`:
+Download the repo,
 
-```elixir
-def deps do
-  [
-    {:ws2019, "~> 0.1.0"}
-  ]
-end
+```
+mix deps.get
+mix compile
+iex -S mix
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ws2019](https://hexdocs.pm/ws2019).
+Execute the examples that you can find in these two files:
 
+- [console.exs](./console.exs)
+- [example_DDD.exs](./example_DDD.exs)
