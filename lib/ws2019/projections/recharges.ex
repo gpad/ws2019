@@ -1,7 +1,7 @@
 defmodule Ws2019.Projections.Recharges do
   use GenServer
+  require Logger
 
-  # TODO: Remove empty list
   def start_link([]) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -53,7 +53,7 @@ defmodule Ws2019.Projections.Recharges do
   end
 
   defp log(%{aggregate_id: aggregate_id} = event, %{log_event: true}) do
-    IO.puts(
+    Logger.info(
       "[LOGEVENT] Recharge executed of #{event.payload.amount} for aggregate_id: #{aggregate_id} curent value: #{
         event.payload.amount
       }"

@@ -1,5 +1,6 @@
 defmodule Ws2019.Policies.AntiFraud do
   use GenStateMachine, callback_mode: :state_functions
+  require Logger
 
   @doc """
   Too many payments failed block the account!!!
@@ -22,7 +23,7 @@ defmodule Ws2019.Policies.AntiFraud do
         :keep_state_and_data
 
       _ ->
-        IO.puts(
+        Logger.info(
           "Account #{data.aggregate_id} goes in warning state, because:\n\t#{inspect(event)}"
         )
 
@@ -62,7 +63,7 @@ defmodule Ws2019.Policies.AntiFraud do
   end
 
   def warning(:state_timeout, event, %{aggregate_id: aggregate_id} = data) do
-    IO.puts("Block account #{aggregate_id} - because:\n\t#{inspect(event)}")
+    Logger.info("Block account #{aggregate_id} - because:\n\t#{inspect(event)}")
     Ws2019.Aggregates.Account.block(aggregate_id, "Timeout Payment Refused")
     {:next_state, :blocked, data}
   end

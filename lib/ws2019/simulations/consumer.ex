@@ -1,7 +1,6 @@
 defmodule Ws2019.Simulations.Consumer do
   use GenServer
-
-  # TODO: Create a supervisor for the Simulation Consumer, Receiver
+  require Logger
 
   def start_link(account_id, between, consume_every_msec) do
     GenServer.start_link(__MODULE__, [account_id, between, consume_every_msec])
@@ -25,10 +24,10 @@ defmodule Ws2019.Simulations.Consumer do
     {res, amount} = consume(state.account_id, state.between)
 
     _ =
-      IO.puts(
+      Logger.info(
         "Consumer #{inspect(self())} - consume from: #{inspect(state.account_id)} of #{
           inspect(amount)
-        }- result: #{inspect(res)}"
+        } - result: #{inspect(res)}"
       )
 
     tref = Process.send_after(self(), :consume, state.consume_every_msec)

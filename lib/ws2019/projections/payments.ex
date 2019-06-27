@@ -1,7 +1,7 @@
 defmodule Ws2019.Projections.Payments do
   use GenServer
+  require Logger
 
-  # TODO: Remove empty list
   def start_link([]) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -69,7 +69,7 @@ defmodule Ws2019.Projections.Payments do
   end
 
   defp log(%{event_id: event_id, aggregate_id: aggregate_id}, %{log_event: true}) do
-    IO.puts("[LOGEVENT] Payment #{event_id} for aggregate_id: #{aggregate_id}")
+    Logger.info("[LOGEVENT] Payment #{event_id} for aggregate_id: #{aggregate_id}")
   end
 
   defp log(_, _), do: :ok

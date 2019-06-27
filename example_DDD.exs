@@ -30,8 +30,9 @@ Ws2019.Projections.Recharges.recharges()
 
 Ws2019.Projections.Payments.log_event(true)
 
-Ws2019.Simulations.Consumer.start_link(42, {100, 300}, :timer.seconds(3))
-Ws2019.Simulations.Recharger.start_link(42, {100, 300}, :timer.seconds(6))
+Ws2019.Simulations.Supervisor.start_consumer(42, {100, 300}, :timer.seconds(3))
+Ws2019.Simulations.Supervisor.start_recharger(42, {100, 300}, :timer.seconds(5))
+Ws2019.Simulations.Supervisor.how_many_child()
 
 Ws2019.Projections.Recharges.log_event(true)
 

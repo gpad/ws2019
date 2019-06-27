@@ -9,8 +9,9 @@ defmodule Ws2019.Application do
     # List all child processes to be supervised
     children = [
       # Starts a worker by calling: Ws2019.Worker.start_link(arg)
-      {Ws2019.Projections.Payments, []},
-      {Ws2019.Projections.Recharges, []}
+      Ws2019.Projections.Payments,
+      Ws2019.Projections.Recharges,
+      Ws2019.Simulations.Supervisor
     ]
 
     {:ok, _} =
