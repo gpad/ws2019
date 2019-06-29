@@ -52,7 +52,4 @@ defmodule Ws2019.Simulations.Supervisor do
       DynamicSupervisor.terminate_child(__MODULE__, pid)
     end)
   end
-
-  def mute_simulation() do
-  end
 end

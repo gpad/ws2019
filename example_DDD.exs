@@ -1,4 +1,4 @@
-# > iex -S mix
+# > iex --sname ws2019 -S mix
 alias Ws2019.Aggregates.Account
 {:ok, _pid} = Ws2019.Aggregates.Account.start_link(42, 5000)
 id = 42
@@ -58,3 +58,15 @@ Ws2019.Simulations.Supervisor.how_many_children()
 
 Ws2019.Simulations.Supervisor.stop_all_children()
 Ws2019.Simulations.Supervisor.how_many_children()
+
+# Connect to a remote node
+# > iex --sname gpad --remsh ws2019@tardis --hidden
+Logger.configure level: :warn
+Logger.configure level: :info
+Ws2019.Simulations.Supervisor.stop_all_children()
+
+Ws2019.Simulations.Supervisor.how_many_children()
+
+# on ws2019
+Ws2019.Simulations.Supervisor.how_many_children()
+Node.list
