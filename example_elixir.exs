@@ -80,7 +80,8 @@ Ws2019.User.new()
 Ws2019.User.new(age: 44)
 Ws2019.User.new(age: 44, tags: [:platinum, :metalhead, :senior_treehugger])
 Ws2019.User.new(tags: [:platinum, :metalhead, :senior_treehugger], age: 44)
-%Ws2019.User{}
+u = %Ws2019.User{}
+is_map(u)
 
 # Process
 @doc """
@@ -90,35 +91,35 @@ Ws2019.User.new(tags: [:platinum, :metalhead, :senior_treehugger], age: 44)
 """
 
 self()
+Process.list |> length
 spawn(fn ->
   Process.sleep(1000)
   IO.puts("DONE #{inspect(self())}")
 end)
 
-pid =
-  spawn(fn ->
-    Process.sleep(1000)
-    IO.puts("DONE #{inspect(self())}")
-  end)
-parent = self
-pid =
-  spawn(fn ->
-    Process.sleep(1000)
-    IO.puts("DONE #{inspect(self())}")
-    send(parent, {:done, self()})
-  end)
-
 Process.alive?(pid)
 
+parent = self
+pid = spawn(fn ->
+  Process.sleep(1000)
+  IO.puts("DONE #{inspect(self())}")
+  send(parent, {:done, self()})
+end)
+Process.alive?(pid)
+
+# Process are isolated
+clear
 self
 spawn(fn ->
   Process.sleep(1000)
   IO.puts("try to dived by Zero")
   1 / 0
-  IO.puts("ininite")
+  IO.puts("Never printed")
 end)
 self
+flush
 
+clear
 flush
 self
 spawn_monitor(fn ->
@@ -127,17 +128,40 @@ spawn_monitor(fn ->
   1 / 0
   IO.puts("ininite")
 end)
+# wait
 self
 flush
 
+clear
 self
 spawn_link(fn ->
-  Process.sleep(1000)
+  Process.sleep(30000)
   IO.puts("try to dived by Zero")
   1 / 0
   IO.puts("ininite")
 end)
+# wait
 self
+
+# distribution
+# > iex --sname server1
+# > iex --sname server2
+
+#on server 2
+Node.ping(:server1@tardis)
+Node.list
+
+#on server 1
+Node.list
+Agent.start(fn -> 42 end, name: :the_response)
+
+Process.whereis :the_response
+
+Agent.get(:the_response, fn state -> state end)
+
+#on server 2
+Process.whereis :the_response
+Agent.get({:the_response, :server1@tardis}, fn state -> state end)
 
 # Debugging
 @doc """
