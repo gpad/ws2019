@@ -1,3 +1,4 @@
+# > iex -S mix
 alias Ws2019.Aggregates.Account
 {:ok, _pid} = Ws2019.Aggregates.Account.start_link(42, 5000)
 id = 42
@@ -23,6 +24,12 @@ Account.consume(id, 20_000)
 Process.whereis(:"42")
 Process.whereis(:anti_fraud_42)
 
+# restart Account
+alias Ws2019.Aggregates.Account
+{:ok, _pid} = Ws2019.Aggregates.Account.start_link(42, 5000)
+id = 42
+Account.current_value(id)
+
 Account.recharge(id, 100)
 
 Ws2019.Projections.Payments.payments()
@@ -32,8 +39,22 @@ Ws2019.Projections.Payments.log_event(true)
 
 Ws2019.Simulations.Supervisor.start_consumer(42, {100, 300}, :timer.seconds(3))
 Ws2019.Simulations.Supervisor.start_recharger(42, {100, 300}, :timer.seconds(5))
-Ws2019.Simulations.Supervisor.how_many_child()
+Ws2019.Simulations.Supervisor.how_many_children()
+Ws2019.Simulations.Supervisor.how_many_consumer()
+Ws2019.Simulations.Supervisor.how_many_recharger()
 
 Ws2019.Projections.Recharges.log_event(true)
 
 Ws2019.Projections.Payments.log_event(false)
+
+Process.list |> length
+
+(1..100) |> Enum.each(fn _ ->
+  Ws2019.Simulations.Supervisor.start_consumer(42, {100, 300}, :timer.seconds(3))
+  Ws2019.Simulations.Supervisor.start_recharger(42, {100, 300}, :timer.seconds(5))
+end)
+
+Ws2019.Simulations.Supervisor.how_many_children()
+
+Ws2019.Simulations.Supervisor.stop_all_children()
+Ws2019.Simulations.Supervisor.how_many_children()

@@ -7,7 +7,7 @@ defmodule Ws2019.Simulations.Consumer do
   end
 
   def init([account_id, between, consume_every_msec]) do
-    tref = Process.send_after(self(), :consume, consume_every_msec)
+    tref = Process.send_after(self(), :consume, rand_around(consume_every_msec))
 
     state = %{
       account_id: account_id,
@@ -30,7 +30,7 @@ defmodule Ws2019.Simulations.Consumer do
         } - result: #{inspect(res)}"
       )
 
-    tref = Process.send_after(self(), :consume, state.consume_every_msec)
+    tref = Process.send_after(self(), :consume, rand_around(state.consume_every_msec))
     {:noreply, %{state | tref: tref}}
   end
 
@@ -39,5 +39,9 @@ defmodule Ws2019.Simulations.Consumer do
     amount = min - 1 + :rand.uniform(max)
     res = Ws2019.Aggregates.Account.consume(account_id, amount)
     {res, amount}
+  end
+
+  def rand_around(value) do
+    trunc(value / 2 + :rand.uniform(value))
   end
 end

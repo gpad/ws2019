@@ -7,7 +7,7 @@ defmodule Ws2019.Simulations.Recharger do
   end
 
   def init([account_id, between, recharge_every_msec]) do
-    tref = Process.send_after(self(), :recharge, recharge_every_msec)
+    tref = Process.send_after(self(), :recharge, rand_around(recharge_every_msec))
 
     state = %{
       account_id: account_id,
@@ -30,7 +30,7 @@ defmodule Ws2019.Simulations.Recharger do
         } - result: #{inspect(res)}"
       )
 
-    tref = Process.send_after(self(), :recharge, state.recharge_every_msec)
+    tref = Process.send_after(self(), :recharge, rand_around(state.recharge_every_msec))
     {:noreply, %{state | tref: tref}}
   end
 
@@ -39,5 +39,9 @@ defmodule Ws2019.Simulations.Recharger do
     amount = min - 1 + :rand.uniform(max)
     res = Ws2019.Aggregates.Account.recharge(account_id, amount)
     {res, amount}
+  end
+
+  def rand_around(value) do
+    trunc(value / 2 + :rand.uniform(value))
   end
 end
