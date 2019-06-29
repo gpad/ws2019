@@ -23,7 +23,7 @@ defmodule Ws2019.Projections.Recharges do
   end
 
   defp handle_event(%{event_id: :recharged} = event, state) do
-    log(event, state)
+    _ = log(event, state)
     recharges = make_recharge_from(event) |> sorted_merge(state.recharges)
     {:ok, %{state | recharges: recharges}}
   end
@@ -49,7 +49,9 @@ defmodule Ws2019.Projections.Recharges do
   end
 
   defp sorted_merge(recharge, recharges) do
-    Enum.sort([recharge | recharges], fn r1, r2 -> r1.recharged_at < r2.recharged_at end)
+    Enum.sort([recharge | recharges], fn r1, r2 ->
+      DateTime.compare(r1.recharged_at, r2.recharged_at) == :lt
+    end)
   end
 
   defp log(%{aggregate_id: aggregate_id} = event, %{log_event: true}) do

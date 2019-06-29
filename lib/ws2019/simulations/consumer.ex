@@ -35,13 +35,13 @@ defmodule Ws2019.Simulations.Consumer do
   end
 
   # rand.uniform 1 =< X =< N
-  def consume(account_id, {min, max}) do
+  defp consume(account_id, {min, max}) do
     amount = min - 1 + :rand.uniform(max)
     res = Ws2019.Aggregates.Account.consume(account_id, amount)
     {res, amount}
   end
 
-  def rand_around(value) do
+  defp rand_around(value) do
     trunc(value / 2 + :rand.uniform(value))
   end
 end

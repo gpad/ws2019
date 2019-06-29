@@ -22,14 +22,14 @@ defmodule Ws2019.Projections.Payments do
     {:noreply, %{state | log_event: value}}
   end
 
-  defp handle_event(%{event_id: :payment_accepted} = event, state) do
-    log(event, state)
-    payments = make_payment_from(event) |> sorted_merge(state.payments)
-    {:ok, %{state | payments: payments}}
+  def handle_info({:broad_cast_event, event}, state) do
+    {:ok, new_state} = handle_event(event, state)
+    {:noreply, new_state}
   end
 
-  defp handle_event(%{event_id: :payment_refused} = event, state) do
-    log(event, state)
+  defp handle_event(%{event_id: event_id} = event, state)
+       when event_id in [:payment_accepted, :payment_refused] do
+    _ = log(event, state)
     payments = make_payment_from(event) |> sorted_merge(state.payments)
     {:ok, %{state | payments: payments}}
   end
@@ -39,11 +39,6 @@ defmodule Ws2019.Projections.Payments do
   defp register(topic) do
     {:ok, _} = Registry.register(:event_dispatcher, topic, [])
     :ok
-  end
-
-  def handle_info({:broad_cast_event, event}, state) do
-    {:ok, new_state} = handle_event(event, state)
-    {:noreply, new_state}
   end
 
   defp make_payment_from(%{event_id: :payment_accepted} = event) do
@@ -65,7 +60,9 @@ defmodule Ws2019.Projections.Payments do
   end
 
   defp sorted_merge(payment, payments) do
-    Enum.sort([payment | payments], fn r1, r2 -> r1.executed_at < r2.executed_at end)
+    Enum.sort([payment | payments], fn r1, r2 ->
+      DateTime.compare(r1.executed_at, r2.executed_at) == :lt
+    end)
   end
 
   defp log(%{event_id: event_id, aggregate_id: aggregate_id}, %{log_event: true}) do

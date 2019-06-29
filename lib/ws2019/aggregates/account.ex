@@ -1,8 +1,6 @@
 defmodule Ws2019.Aggregates.Account do
   use GenServer
 
-  # TODO: Create Supervisro for account
-
   def start_link(id, value) do
     GenServer.start_link(__MODULE__, [id, value], name: :"#{id}")
   end
@@ -12,7 +10,9 @@ defmodule Ws2019.Aggregates.Account do
     {:ok, %{id: id, last_action: DateTime.utc_now(), value: value, anti_fraud_pid: pid}}
   end
 
-  def current_value(id) when is_atom(id) or is_pid(id), do: GenServer.call(id, :current_value)
+  def current_value(id) when is_atom(id) or is_pid(id),
+    do: GenServer.call(id, :current_value)
+
   def current_value(id), do: GenServer.call(:"#{id}", :current_value)
 
   def consume(id, amount) when is_atom(id) or is_pid(id),

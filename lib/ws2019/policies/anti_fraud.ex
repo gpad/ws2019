@@ -3,7 +3,7 @@ defmodule Ws2019.Policies.AntiFraud do
   require Logger
 
   @doc """
-  Too many payments failed block the account!!!
+  Payment failed for 5 sec block the account!!!
   """
 
   def start_link(aggregate_id) do
@@ -23,12 +23,13 @@ defmodule Ws2019.Policies.AntiFraud do
         :keep_state_and_data
 
       _ ->
-        Logger.info(
-          "Account #{data.aggregate_id} goes in warning state, because:\n\t#{inspect(event)}"
-        )
+        _ =
+          Logger.info(
+            "Account #{data.aggregate_id} goes in warning state, because:\n\t#{inspect(event)}"
+          )
 
         {:next_state, :warning, %{data | entered_at: event.header.emitted_at},
-         {:state_timeout, 5000, event}}
+         {:state_timeout, 5_000, event}}
     end
   end
 
@@ -51,6 +52,7 @@ defmodule Ws2019.Policies.AntiFraud do
         :keep_state_and_data
 
       _ ->
+        _ = Logger.info("Account #{data.aggregate_id} exit from warning state")
         {:next_state, :regular, %{data | entered_at: event.header.emitted_at}}
     end
   end
@@ -63,12 +65,12 @@ defmodule Ws2019.Policies.AntiFraud do
   end
 
   def warning(:state_timeout, event, %{aggregate_id: aggregate_id} = data) do
-    Logger.info("Block account #{aggregate_id} - because:\n\t#{inspect(event)}")
-    Ws2019.Aggregates.Account.block(aggregate_id, "Timeout Payment Refused")
+    _ = Logger.info("Block account #{aggregate_id} - because:\n\t#{inspect(event)}")
+    :ok = Ws2019.Aggregates.Account.block(aggregate_id, "Timeout Payment Refused")
     {:next_state, :blocked, data}
   end
 
-  def warning(_, _, _), do: :keep_state_and_data
+  def warning(event_type, event_content, data), do: handle_event(event_type, event_content, data)
 
   def blocked(_, _, _), do: :keep_state_and_data
 
@@ -83,11 +85,6 @@ defmodule Ws2019.Policies.AntiFraud do
   end
 
   defp handle_event(_event_type, _event_content, _data), do: :keep_state_and_data
-
-  # def handle_info({:broad_cast_event, event}, state) do
-  #   {:ok, new_state} = handle_domain_event(event, state)
-  #   {:noreply, new_state}
-  # end
 
   defp handle_domain_event(
          %{event_id: :payment_refused, aggregate_id: aggregate_id} = event,
