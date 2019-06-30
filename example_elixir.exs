@@ -78,6 +78,8 @@ Enum.reduce(&(&1 + &2))
 
 # ---------------------------------------
 
+# Show code of the Ws2019.User
+
 # > iex -S mix
 
 Ws2019.User.new()
@@ -153,6 +155,10 @@ spawn_link(fn ->
 end)
 # wait
 self
+
+# Talk about GenServer and show example of the account!!
+
+# ---
 
 # distribution
 # > iex --sname server1

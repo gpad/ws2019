@@ -1,11 +1,17 @@
 # > iex --sname ws2019 -S mix
 alias Ws2019.Aggregates.Account
 {:ok, _pid} = Ws2019.Aggregates.Account.start_link(42, 5000)
-id = 42
-Account.current_value(id)
+Account.current_value(42)
 
 Process.whereis(:"42")
 Process.whereis(:anti_fraud_42)
+Process.whereis(Ws2019.Projections.Payments)
+Process.whereis(Ws2019.Projections.Recharges)
+
+{:ok, _pid} = Ws2019.Aggregates.Account.start_link(666, 5000)
+Account.current_value(666)
+Process.whereis(:"666")
+Process.whereis(:anti_fraud_666)
 
 Process.whereis(Ws2019.Projections.Payments)
 Process.whereis(Ws2019.Projections.Recharges)
@@ -13,16 +19,20 @@ Process.whereis(Ws2019.Projections.Recharges)
 Ws2019.Projections.Payments.payments()
 Ws2019.Projections.Recharges.recharges()
 
-Account.consume(id, 200)
-Account.consume(id, 200)
-Account.consume(id, 200)
-Account.recharge(id, 100)
+Account.consume(42, 200)
+Account.consume(666, 200)
+Account.consume(666, 200)
+Account.consume(42, 200)
+Account.recharge(42, 100)
+Account.recharge(666, 100)
 
-Account.current_value(id)
+Account.current_value(42)
+Account.current_value(666)
 
 Ws2019.Projections.Payments.payments()
 Ws2019.Projections.Recharges.recharges()
 
+id = 42
 Account.consume(id, 200)
 Account.consume(id, 200)
 Account.consume(id, 200)
@@ -105,3 +115,4 @@ Ws2019.Simulations.Supervisor.how_many_children()
 # on ws2019
 Ws2019.Simulations.Supervisor.how_many_children()
 Node.list
+Node.list(:hidden)
