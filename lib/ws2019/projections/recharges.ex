@@ -44,7 +44,8 @@ defmodule Ws2019.Projections.Recharges do
     %{
       current_value: event.payload.current_value,
       recharged_of: event.payload.amount,
-      recharged_at: event.header.emitted_at
+      recharged_at: event.header.emitted_at,
+      aggregate_id: event.aggregate_id
     }
   end
 

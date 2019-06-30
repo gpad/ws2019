@@ -7,6 +7,9 @@ Account.current_value(id)
 Process.whereis(:"42")
 Process.whereis(:anti_fraud_42)
 
+Process.whereis(Ws2019.Projections.Payments)
+Process.whereis(Ws2019.Projections.Recharges)
+
 Ws2019.Projections.Payments.payments()
 Ws2019.Projections.Recharges.recharges()
 

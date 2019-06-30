@@ -34,7 +34,6 @@ l1 == l
 m = %{a: 2, c: 3, d: 4}
 %{a: v} = m
 v
-2
 %{z: v} = m
 
 # Talk about rebinding
@@ -71,11 +70,11 @@ sum = 1..10 |> Enum.map(&(&1 * 3)) |>
 Enum.filter(&(rem(&1, 2) == 0)) |>
 Enum.reduce(&(&1 + &2))
 
-# 1..10 |> Enum.map(&(&1 * 3)) |>
-# IO.inspect() |>
-# Enum.filter(&(rem(&1, 2) == 0)) |>
-# IO.inspect() |>
-# Enum.reduce(&(&1 + &2))
+1..10 |> Enum.map(&(&1 * 3)) |>
+IO.inspect() |>
+Enum.filter(&(rem(&1, 2) == 0)) |>
+IO.inspect() |>
+Enum.reduce(&(&1 + &2))
 
 # ---------------------------------------
 
@@ -95,14 +94,20 @@ is_map(u)
 - GenServer / GenStateMachine
 """
 
-self()
 Process.list |> length
+
+clear
+self()
 pid = spawn(fn ->
   Process.sleep(1000)
   IO.puts("DONE #{inspect(self())}")
 end)
+Process.list |> length
 
 Process.alive?(pid)
+
+# explain self and flush
+send(self(), {:hey, 42})
 
 parent = self
 pid = spawn(fn ->
@@ -154,6 +159,7 @@ self
 # > iex --sname server2
 
 #on server 2
+Node.list
 Node.ping(:server1@tardis)
 Node.list
 
@@ -168,6 +174,10 @@ Agent.get(:the_response, fn state -> state end)
 #on server 2
 Process.whereis :the_response
 Agent.get({:the_response, :server1@tardis}, fn state -> state end)
+
+#on server 1
+Process.whereis(:the_response) |> Process.exit(:kill)
+Process.whereis(:the_response)
 
 # Debugging
 @doc """
