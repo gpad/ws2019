@@ -36,13 +36,17 @@ id = 42
 Account.consume(id, 200)
 Account.consume(id, 200)
 Account.consume(id, 200)
+
 Ws2019.Projections.Payments.payments()
+
 Account.current_value(id)
 
 Account.recharge(id, 100)
 Account.recharge(id, 100)
 Account.recharge(id, 100)
+
 Ws2019.Projections.Recharges.recharges()
+
 Account.current_value(id)
 
 Process.whereis(:"42")
@@ -108,6 +112,7 @@ Ws2019.Simulations.Supervisor.how_many_children()
 # > iex --sname gpad --remsh ws2019@tardis --hidden
 Logger.configure level: :warn
 Logger.configure level: :info
+Ws2019.Simulations.Supervisor.how_many_children()
 Ws2019.Simulations.Supervisor.stop_all_children()
 
 Ws2019.Simulations.Supervisor.how_many_children()
