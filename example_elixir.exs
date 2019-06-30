@@ -22,9 +22,14 @@ m == m1
 
 l = [1, 2, 3]
 [x, y, z] = l
+x
+y
+z
 [h | t] = l
 h
 t
+l1 = [h | t]
+l1 == l
 
 m = %{a: 2, c: 3, d: 4}
 %{a: v} = m
@@ -66,11 +71,11 @@ sum = 1..10 |> Enum.map(&(&1 * 3)) |>
 Enum.filter(&(rem(&1, 2) == 0)) |>
 Enum.reduce(&(&1 + &2))
 
-1..10 |> Enum.map(&(&1 * 3)) |>
-IO.inspect() |>
-Enum.filter(&(rem(&1, 2) == 0)) |>
-IO.inspect() |>
-Enum.reduce(&(&1 + &2))
+# 1..10 |> Enum.map(&(&1 * 3)) |>
+# IO.inspect() |>
+# Enum.filter(&(rem(&1, 2) == 0)) |>
+# IO.inspect() |>
+# Enum.reduce(&(&1 + &2))
 
 # ---------------------------------------
 
@@ -92,7 +97,7 @@ is_map(u)
 
 self()
 Process.list |> length
-spawn(fn ->
+pid = spawn(fn ->
   Process.sleep(1000)
   IO.puts("DONE #{inspect(self())}")
 end)
@@ -106,6 +111,7 @@ pid = spawn(fn ->
   send(parent, {:done, self()})
 end)
 Process.alive?(pid)
+flush
 
 # Process are isolated
 clear
@@ -126,7 +132,7 @@ spawn_monitor(fn ->
   Process.sleep(1000)
   IO.puts("try to dived by Zero")
   1 / 0
-  IO.puts("ininite")
+  IO.puts("NEVER PRINTED!!!")
 end)
 # wait
 self
@@ -135,7 +141,7 @@ flush
 clear
 self
 spawn_link(fn ->
-  Process.sleep(30000)
+  Process.sleep(1000)
   IO.puts("try to dived by Zero")
   1 / 0
   IO.puts("ininite")
