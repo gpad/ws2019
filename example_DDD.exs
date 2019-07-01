@@ -113,6 +113,7 @@ Ws2019.Simulations.Supervisor.how_many_children()
 Logger.configure level: :warn
 Logger.configure level: :info
 Ws2019.Simulations.Supervisor.how_many_children()
+Logger.configure level: :info
 Ws2019.Simulations.Supervisor.stop_all_children()
 
 Ws2019.Simulations.Supervisor.how_many_children()
